@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 import { inventory, INVENTORY_IDS } from "@/lib/inventory";
-import { preFilterInventory } from "@/lib/scorer";
+import { semanticSearch } from "@/lib/vectorSearch";
 import { MatchedResult, ScoutResponse } from "@/lib/types";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// Zod schema - hallucination firewall.
+// Any ID returned by Gemini that isn't in our inventory is rejected here.
 const AIResponseSchema = z.object({
   matches: z.array(
     z.object({
       id: z.number().refine((id) => INVENTORY_IDS.includes(id), {
-        message: "ID not in inventory - rejecting hallucination",
+        message: "ID not in inventory - hallucination rejected",
       }),
       reason: z.string().min(10).max(200),
     }),
@@ -38,9 +40,18 @@ export async function POST(req: NextRequest) {
     }
 
     // --- RETRIEVAL LAYER ---
-    const scoredCandidates = preFilterInventory(query, inventory);
+    // Step 1: Embed the user's query using the same model used for inventory
+    const embeddingModel = genAI.getGenerativeModel({
+      model: "gemini-embedding-001",
+    });
+    const queryEmbedding = await embeddingModel.embedContent(query);
+    const queryVector = queryEmbedding.embedding.values;
 
-    if (scoredCandidates.length === 0) {
+    // Step 2: Semantic search - cosine similarity against precomputed inventory vectors
+    const searchResults = semanticSearch(queryVector);
+
+    // Nothing passed the similarity threshold
+    if (searchResults.length === 0) {
       const response: ScoutResponse = {
         results: [],
         totalFound: 0,
@@ -49,41 +60,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(response);
     }
 
-    const candidatesForAI = scoredCandidates.map((s) => ({
-      id: s.item.id,
-      title: s.item.title,
-      location: s.item.location,
-      price: s.item.price,
-      tags: s.item.tags,
+    // --- AUGMENTED PROMPT ---
+    // Only semantically relevant candidates are sent to Gemini
+    const candidatesForAI = searchResults.map((r) => ({
+      id: r.item.id,
+      title: r.item.title,
+      location: r.item.location,
+      price: r.item.price,
+      tags: r.item.tags,
     }));
 
-    // --- AUGMENTED PROMPT ---
-    const prompt = `You are a travel experience matcher. Your ONLY job is to match a user's travel query to experiences from the provided inventory.
+    const prompt = `You are a travel experience matcher. Match the user's query to the most relevant experiences from the inventory below.
 
     STRICT RULES:
-    1. Only return items from the provided inventory. Never suggest anything outside it.
-    2. Return ONLY valid JSON — no markdown, no code fences, no explanation outside the JSON.
-    3. If no items match well, return an empty matches array.
-    4. Keep each reason to 1 concise sentence mentioning tags, price, or location.
+    1. You MUST only return items from the provided inventory. Never suggest anything outside it.
+    2. Return ONLY valid JSON matching the schema below. No markdown, no code fences, no text outside the JSON.
+    3. Only include items that genuinely match the query. If nothing matches well, return an empty matches array.
+    4. Each reason must be one concise sentence explaining the specific match — mention relevant tags, price fit, or location.
+    5. Rank matches from most relevant to least relevant.
 
-    RESPONSE FORMAT (return exactly this structure):
-    {"matches": [{"id": <number>, "reason": "<one sentence>"}]}
+    RESPONSE SCHEMA:
+    {"matches": [{"id": <number>, "reason": "<one sentence why this matches the query>"}]}
 
-    INVENTORY (match ONLY from these):
-    ${JSON.stringify(candidatesForAI)}
+    INVENTORY:
+    ${JSON.stringify(candidatesForAI, null, 2)}
 
     User query: "${query}"`;
 
     // --- GENERATION LAYER ---
-    const model = genAI.getGenerativeModel({
+    const chatModel = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig: {
         temperature: 0,
-        responseMimeType: "application/json", // Forces Gemini to return pure JSON
+        responseMimeType: "application/json",
       },
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await chatModel.generateContent(prompt);
     const rawText = result.response.text().trim();
 
     // --- ZOD VALIDATION (Hallucination Firewall) ---
@@ -91,7 +104,7 @@ export async function POST(req: NextRequest) {
     try {
       parsed = AIResponseSchema.parse(JSON.parse(rawText));
     } catch {
-      console.error("AI response failed schema validation:", rawText);
+      console.error("Schema validation failed:", rawText);
       return NextResponse.json(
         { error: "AI returned an unexpected response. Please try again." },
         { status: 500 },
@@ -99,15 +112,16 @@ export async function POST(req: NextRequest) {
     }
 
     // --- BUILD FINAL RESPONSE ---
+    // Join validated IDs back to full inventory data + similarity scores
     const results: MatchedResult[] = parsed.matches
       .map((match) => {
         const inventoryItem = inventory.find((i) => i.id === match.id);
-        const scored = scoredCandidates.find((s) => s.item.id === match.id);
+        const searchResult = searchResults.find((r) => r.item.id === match.id);
         if (!inventoryItem) return null;
         return {
           item: inventoryItem,
           reason: match.reason,
-          score: scored?.score ?? 0,
+          similarity: searchResult?.similarity ?? 0,
         };
       })
       .filter((r): r is MatchedResult => r !== null);
