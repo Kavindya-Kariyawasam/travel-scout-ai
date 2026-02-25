@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["scripts/**/*.ts", "src/lib/inventory.ts"]
+}
