@@ -1,3 +1,19 @@
+/**
+ * DEPRECATED - No longer used in the active pipeline.
+ *
+ * This was our initial retrieval layer: manual tag synonym expansion +
+ * regex-based price ceiling extraction. It worked, but carried a real risk
+ * of missing relevant results whenever a user's wording didn't match our
+ * hardcoded synonym map (e.g. "peaceful" never mapped to "beach").
+ *
+ * Replaced this with real semantic search using Gemini embeddings
+ * (see vectorSearch.ts). The embedding model captures meaning, not just
+ * keywords, so it handles phrasing we never anticipated.
+ *
+ * Kept in the repo for reference - shows the evolution from keyword
+ * matching to vector search.
+ */
+
 import { TravelItem } from "./types";
 
 interface ScoredItem {
