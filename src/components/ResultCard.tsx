@@ -29,7 +29,7 @@ function getTagColor(tag: string): string {
 }
 
 export default function ResultCard({ result, rank }: ResultCardProps) {
-  const { item, reason } = result;
+  const { item, reason, similarity } = result;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition p-5 space-y-3">
@@ -48,9 +48,14 @@ export default function ResultCard({ result, rank }: ResultCardProps) {
             </p>
           </div>
         </div>
-        <span className="flex-shrink-0 text-base font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl">
-          ${item.price}
-        </span>
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <span className="text-base font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl">
+            ${item.price}
+          </span>
+          <span className="text-xs text-gray-400">
+            {Math.round(similarity * 100)}% match
+          </span>
+        </div>
       </div>
 
       {/* Tags */}
