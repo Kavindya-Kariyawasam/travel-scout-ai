@@ -3,6 +3,7 @@
 An AI-powered travel experience finder. Describe your ideal trip in plain English and get intelligently matched experiences, with clear reasoning for every suggestion.
 
 > Built with Next.js, Gemini AI, semantic vector search, and Tailwind CSS.
+> **[Live Demo →](https://travel-scout-ai.vercel.app/)**
 
 ---
 
