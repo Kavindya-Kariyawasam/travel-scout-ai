@@ -7,6 +7,21 @@ import { MatchedResult, ScoutResponse } from "@/lib/types";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// --- RATE LIMITING ---
+// Per IP, In-memory, Resets on cold starts
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 10; // max requests per window
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = requestLog.get(ip) ?? [];
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  recent.push(now);
+  requestLog.set(ip, recent);
+  return recent.length > RATE_LIMIT_MAX_REQUESTS;
+}
+
 // Zod schema - hallucination firewall.
 // Any ID returned by Gemini that isn't in our inventory is rejected here.
 const AIResponseSchema = z.object({
@@ -22,6 +37,16 @@ const AIResponseSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit check
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment and try again." },
+        { status: 429 },
+      );
+    }
+
     const body = await req.json();
     const query: string = body.query?.trim();
 

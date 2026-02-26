@@ -36,7 +36,7 @@ User Query
      │
      ▼
 ┌──────────┐
-│ GENERATE │  gemini-2.0-flash reasons over candidates
+│ GENERATE │  gemini-2.5-flash reasons over candidates
 └────┬─────┘ Returns matched item IDs + reasoning (temperature: 0)
      │
      ▼
@@ -61,7 +61,7 @@ Natural language price expressions ("cheap", "below hundred", "under Rs.100") ar
 | Layer           | Technology                                      |
 | --------------- | ----------------------------------------------- |
 | Framework       | Next.js 14 (App Router, TypeScript)             |
-| AI - Chat       | Gemini `gemini-2.0-flash`                       |
+| AI - Chat       | Gemini `gemini-2.5-flash`                       |
 | AI - Embeddings | Gemini `gemini-embedding-001` (3072 dimensions) |
 | Validation      | Zod                                             |
 | Styling         | Tailwind CSS 3.x                                |

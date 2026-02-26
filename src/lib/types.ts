@@ -10,7 +10,7 @@ export interface TravelItem {
 export interface EmbeddedItem {
   id: number;
   text: string; // the text that was embedded (for transparency)
-  vector: number[]; // the embedding vector from Gemini text-embedding-004
+  vector: number[]; // the embedding vector from Gemini gemini-embedding-001
 }
 
 export interface MatchedResult {
