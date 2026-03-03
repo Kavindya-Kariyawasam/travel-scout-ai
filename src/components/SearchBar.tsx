@@ -34,14 +34,14 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder='Describe your ideal trip... e.g. "beach weekend under $100"'
-          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition text-sm"
+          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-500 focus:border-transparent transition text-sm"
           maxLength={300}
           disabled={isLoading}
         />
         <button
           onClick={handleSearch}
           disabled={!query.trim() || isLoading}
-          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold rounded-xl shadow-sm transition text-sm whitespace-nowrap"
+          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 text-white font-semibold rounded-xl shadow-sm transition text-sm whitespace-nowrap"
         >
           {isLoading ? "Searching..." : "Find Experiences"}
         </button>
@@ -49,7 +49,9 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
       {/* Example query chips */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-xs text-gray-400 self-center">Try:</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 self-center">
+          Try:
+        </span>
         {EXAMPLE_QUERIES.map((example) => (
           <button
             key={example}
@@ -58,7 +60,7 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
               onSearch(example);
             }}
             disabled={isLoading}
-            className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 rounded-full border border-gray-200 hover:border-emerald-200 transition disabled:opacity-50"
+            className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-400 text-gray-600 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700 hover:border-emerald-200 dark:hover:border-emerald-800 transition disabled:opacity-50"
           >
             {example}
           </button>
