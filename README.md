@@ -27,12 +27,12 @@ User Query
     │
     ▼
 ┌─────────┐
-│ RETRIEVE │  Embed query with Gemini gemini-embedding-001
+│ RETRIEVE│  Embed query with Gemini gemini-embedding-001
 └────┬────┘  Cosine similarity vs precomputed inventory vectors
      │       Drop items below 0.5 similarity threshold
      ▼
 ┌─────────┐
-│ AUGMENT  │  Build prompt with only semantically relevant candidates
+│ AUGMENT │  Build prompt with only semantically relevant candidates
 └────┬────┘  Gemini never sees items that aren't relevant
      │
      ▼
