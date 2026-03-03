@@ -38,27 +38,28 @@ export default function ResultCard({ result, rank }: ResultCardProps) {
   const { item, reason, similarity } = result;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition p-5 space-y-3">
+    <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition p-4 sm:p-5 space-y-3">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
+        <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+          <span className="mt-0.5 flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center">
             {rank}
           </span>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white text-base leading-snug">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base leading-snug break-words">
               {item.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" /> {item.location}
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />{" "}
+              <span className="truncate">{item.location}</span>
             </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-3 py-1 rounded-xl">
+          <span className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl">
             ${item.price}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
             {Math.round(similarity * 100)}% match
           </span>
         </div>
@@ -77,9 +78,9 @@ export default function ResultCard({ result, rank }: ResultCardProps) {
       </div>
 
       {/* AI Reasoning */}
-      <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900 rounded-xl px-3 py-2.5">
-        <Sparkles className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
-        <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">
+      <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900 rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-2 sm:py-2.5">
+        <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+        <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">
           {reason}
         </p>
       </div>

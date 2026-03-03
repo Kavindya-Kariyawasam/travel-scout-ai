@@ -7,4 +7,10 @@ html {
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent horizontal overflow on mobile */
+body {
+  overflow-x: hidden;
 }
